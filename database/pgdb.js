@@ -15,7 +15,7 @@ module.exports = pgPool => {
                 return orderedFor(res.rows, userIds, 'id', true);
             });
 
-            
+            //asdas
         },
         getUserByApiKeys(apiKeys){
             return pgPool.query(`
