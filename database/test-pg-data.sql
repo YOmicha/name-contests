@@ -3,47 +3,13 @@ drop table if exists names;
 drop table if exists contests;
 drop table if exists users;
 
-create table users (
-  id serial primary key,
-  email varchar(128) not null,
-  first_name varchar(128),
-  last_name varchar(128),
-  api_key varchar(128) not null unique,
-  created_at timestamp not null default current_timestamp
-);
+create table users (id serial primary key,email varchar(128) not null,first_name varchar(128),last_name varchar(128),api_key varchar(128) not null unique,created_at timestamp not null default current_timestamp);
 
-create table contests (
-  id serial primary key,
-  code varchar(255) not null unique,
-  title varchar(255) not null,
-  description text,
-  status varchar(10) not null default 'draft'
-    check (status in ('draft', 'published', 'archived')),
-  created_at timestamp not null default current_timestamp,
-  created_by integer references users not null
-);
+create table contests (id serial primary key,code varchar(255) not null unique,title varchar(255) not null,description text,status varchar(10) not null default 'draft' check (status in ('draft', 'published', 'archived')),created_at timestamp not null default current_timestamp,created_by integer references users not null);
 
-create table names (
-  id serial primary key,
-  contest_id integer references contests not null,
-  label varchar(255) not null,
-  normalized_label varchar(255) not null,
-  description text,
-  created_at timestamp not null default current_timestamp,
-  created_by integer references users not null,
-  constraint unique_contest_label
-    unique(contest_id, normalized_label)
-);
+create table names (id serial primary key,contest_id integer references contests not null,label varchar(255) not null,normalized_label varchar(255) not null,description text,created_at timestamp not null default current_timestamp,created_by integer references users not null,constraint unique_contest_label unique(contest_id, normalized_label));
 
-create table votes (
-  id serial primary key,
-  name_id integer references names not null,
-  up boolean not null,
-  created_at timestamp not null default current_timestamp,
-  created_by integer references users not null,
-  constraint user_can_vote_once_on_a_name
-    unique(name_id, created_by)
-);
+create table votes (id serial primary key,name_id integer references names not null,up boolean not null,created_at timestamp not null default current_timestamp,created_by integer references users not null,constraint user_can_vote_once_on_a_name unique(name_id, created_by));
 
 INSERT INTO "users" ("email","first_name","last_name","api_key")
 VALUES
@@ -73,3 +39,6 @@ VALUES
 (3,FALSE,2),
 (4,TRUE,1),
 (4,TRUE,2);
+
+
+create view total_votes_by_name as select id as name_id, (select count(up) from votes v where v.name_id = n.id and up = true) as up, (select count(up) from votes v where v.name_id = n.id and up = false) as down from names n;

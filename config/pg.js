@@ -1,5 +1,7 @@
 module.exports = {
   development: {
-    database: 'contests'
+    database: 'contests',     
+    user: 'postgres',
+    password: 'michael'
   }
 };
